@@ -1,62 +1,64 @@
-# Parkplatz-Reservierungssystem
+# Parking Space Manager Demo
 
-Ein vollständiges System zur Verwaltung von Parkplatzreservierungen mit Supabase-Backend und React-Frontend.
+This project is a **fully generated demo project** and serves presentation purposes only.
 
-## Schnellstart
+## Project Structure
 
-Führen Sie die folgenden Befehle aus, um die Anwendung zu starten:
+The project consists of two main components:
+- **Frontend**: A modern web application
+- **Backend**: An API with database connection
 
-### 1. Backend starten
+## Installation Guide
+
+### Prerequisites
+- Node.js (v16 or higher)
+- npm or yarn
+
+### Starting the Backend
 
 ```bash
-# Navigieren Sie zum Backend-Verzeichnis
+# Change to the backend directory
 cd backend
 
-# Starten Sie Supabase
-supabase start
+# Install dependencies
+npm install
+# or
+yarn install
 
-# Starten Sie die Edge Functions (in einem neuen Terminal)
-cd backend
-supabase functions serve
+# Configure environment variables
+# Copy .env.example to .env and adjust the values
+
+# Start the server
+npm run dev
+# or
+yarn dev
 ```
 
-### 2. Frontend starten
+### Starting the Frontend
 
 ```bash
-# Navigieren Sie zum Frontend-Verzeichnis (in einem neuen Terminal)
+# Change to the frontend directory
 cd frontend
 
-# Starten Sie den Entwicklungsserver
+# Install dependencies
+npm install
+# or
+yarn install
+
+# Start the development server
 npm run dev
+# or
+yarn dev
 ```
 
-### 3. Anwendung öffnen
+## Accessing the Application
 
-Öffnen Sie [http://localhost:3000](http://localhost:3000) in Ihrem Browser.
+After starting the frontend, the application is accessible at:
+- http://localhost:3000
 
-## Erstanmeldung
+The backend API is available by default at:
+- http://localhost:8000
 
-Bei der ersten Nutzung müssen Sie einen Benutzer registrieren:
+## Note
 
-1. Klicken Sie auf den Tab "Registrieren"
-2. Geben Sie eine E-Mail-Adresse und ein Passwort ein (mindestens 6 Zeichen)
-3. Klicken Sie auf "Registrieren"
-4. Melden Sie sich mit den erstellten Anmeldedaten an
-
-## Projektstruktur
-
-- `backend/`: Supabase-Backend mit Edge Functions
-  - `supabase/functions/`: Edge Functions für die API
-  - `supabase/migrations/`: Datenbankmigrationen
-
-- `frontend/`: React-Frontend
-  - `src/components/`: UI-Komponenten
-  - `src/pages/`: Hauptseiten der Anwendung
-  - `src/utils/`: Hilfsfunktionen und API-Clients
-
-## Weitere Informationen
-
-Detaillierte Informationen finden Sie in den README-Dateien der jeweiligen Verzeichnisse:
-
-- [Backend README](backend/README.md)
-- [Frontend README](frontend/README.md) 
+This project was automatically generated and is intended for demonstration purposes only. It is not meant for production use. 
