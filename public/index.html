@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parking Space Manager - Architecture Diagram</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f7fa;
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: #2c3e50;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #3498db;
+        }
+
+        .diagram-container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .diagram-description {
+            margin-bottom: 20px;
+        }
+
+        .mermaid {
+            display: flex;
+            justify-content: center;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            background-color: #e0e0e0;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px 5px 0 0;
+            margin-right: 5px;
+        }
+
+        .tab.active {
+            background-color: white;
+            border-bottom: 3px solid #3498db;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            font-size: 0.9em;
+            color: #7f8c8d;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Parking Space Manager System</h1>
+
+    <div class="tabs">
+        <button class="tab active" onclick="openTab(event, 'architecture')">System Architecture</button>
+        <button class="tab" onclick="openTab(event, 'userflow')">User Flow</button>
+        <button class="tab" onclick="openTab(event, 'db-schema')">Database Schema</button>
+    </div>
+
+    <div id="architecture" class="tab-content active">
+        <div class="diagram-container">
+            <div class="diagram-description">
+                <h2>System Architecture</h2>
+                <p>
+                    The Parking Space Manager System consists of three main components: a Frontend (React/TypeScript),
+                    a Backend (Supabase Edge Functions), and a Database (PostgreSQL). The diagram shows the
+                    relationships
+                    between these components and the data flow within the system.
+                </p>
+            </div>
+            <div class="mermaid">
+                graph TB
+                %% Main Components
+                subgraph "Frontend (React + TypeScript)"
+                UI["User Interface"]
+                Auth["Authentication"]
+                ReservationMgmt["Reservation Management"]
+                API_Client["API Client"]
+                end
+
+                subgraph "Backend (Supabase Edge Functions)"
+                API["REST API"]
+                subgraph "Edge Functions"
+                ListReservations["list-reservations"]
+                CreateReservation["create-reservation"]
+                UpdateReservation["update-reservation"]
+                DeleteReservation["delete-reservation"]
+                end
+                end
+
+                subgraph "Database (Supabase PostgreSQL)"
+                DB["PostgreSQL Database"]
+                subgraph "Tables"
+                ReservationsTable["Reservations"]
+                UsersTable["Users (Auth)"]
+                end
+                end
+
+                %% Connections
+                UI --> Auth
+                UI --> ReservationMgmt
+                ReservationMgmt --> API_Client
+                API_Client --> API
+
+                API --> ListReservations
+                API --> CreateReservation
+                API --> UpdateReservation
+                API --> DeleteReservation
+
+                ListReservations --> DB
+                CreateReservation --> DB
+                UpdateReservation --> DB
+                DeleteReservation --> DB
+
+                DB --> ReservationsTable
+                DB --> UsersTable
+
+                %% Data Flow
+                User((User)) --> UI
+                ReservationsTable -.-> ListReservations
+                CreateReservation -.-> ReservationsTable
+                UpdateReservation -.-> ReservationsTable
+                DeleteReservation -.-> ReservationsTable
+
+                %% Styling
+                classDef frontend fill:#f9f,stroke:#333,stroke-width:2px
+                classDef backend fill:#bbf,stroke:#333,stroke-width:2px
+                classDef database fill:#bfb,stroke:#333,stroke-width:2px
+                classDef user fill:#fbb,stroke:#333,stroke-width:2px
+
+                class UI,Auth,ReservationMgmt,API_Client frontend
+                class API,ListReservations,CreateReservation,UpdateReservation,DeleteReservation backend
+                class DB,ReservationsTable,UsersTable database
+                class User user
+            </div>
+        </div>
+    </div>
+
+    <div id="userflow" class="tab-content">
+        <div class="diagram-container">
+            <div class="diagram-description">
+                <h2>User Flow</h2>
+                <p>
+                    This sequence diagram shows the typical flow of user interactions with the system,
+                    including authentication, viewing reservations, creating new reservations,
+                    editing existing reservations, and deleting reservations.
+                </p>
+            </div>
+            <div class="mermaid">
+                sequenceDiagram
+                autonumber
+                actor User
+                participant UI as Frontend UI
+                participant API as Backend API
+                participant DB as Database
+
+                %% Authentication
+                User->>UI: Login
+                UI->>API: Authentication request
+                API->>DB: Verify credentials
+                DB-->>API: Authentication result
+                API-->>UI: Auth token
+                UI-->>User: Login successful
+
+                %% View Reservations
+                User->>UI: View reservations
+                UI->>API: GET /list-reservations
+                API->>DB: SQL query (time range)
+                DB-->>API: Reservation data
+                API-->>UI: JSON reservation list
+                UI-->>User: Display reservations
+
+                %% Create New Reservation
+                User->>UI: Create new reservation
+                UI->>UI: Show form
+                User->>UI: Enter reservation data
+                UI->>API: POST /create-reservation
+                API->>DB: Check for overlaps
+                DB-->>API: Overlap check result
+
+                alt No Overlap
+                API->>DB: INSERT reservation
+                DB-->>API: Success
+                API-->>UI: Reservation created
+                UI-->>User: Success message
+                else Overlap Found
+                API-->>UI: Error: Overlap
+                UI-->>User: Error message
+                end
+
+                %% Edit Reservation
+                User->>UI: Edit reservation
+                UI->>UI: Show edit form
+                User->>UI: Update data
+                UI->>API: PUT /update-reservation/:id
+                API->>DB: UPDATE reservation
+                DB-->>API: Result
+                API-->>UI: Update status
+                UI-->>User: Confirmation
+
+                %% Delete Reservation
+                User->>UI: Delete reservation
+                UI->>User: Request confirmation
+                User->>UI: Confirm
+                UI->>API: DELETE /delete-reservation/:id
+                API->>DB: DELETE reservation
+                DB-->>API: Result
+                API-->>UI: Delete status
+                UI-->>User: Confirmation
+            </div>
+        </div>
+    </div>
+
+    <div id="db-schema" class="tab-content">
+        <div class="diagram-container">
+            <div class="diagram-description">
+                <h2>Database Schema</h2>
+                <p>
+                    This diagram shows the structure of the database, including tables, relationships,
+                    constraints, and security policies. The main tables are "Users" and "Reservations",
+                    where a user can have multiple reservations.
+                </p>
+            </div>
+            <div style="display: flex; justify-content: center; margin-top: 30px;">
+                <div style="display: flex; flex-direction: column; align-items: center;">
+                    <!-- Database Tables -->
+                    <div style="display: flex; gap: 50px; margin-bottom: 30px;">
+                        <!-- Auth Users Table -->
+                        <div
+                            style="border: 2px solid #333; border-radius: 8px; padding: 20px; background-color: #bbf; width: 300px;">
+                            <h3
+                                style="text-align: center; margin-top: 0; border-bottom: 1px solid #333; padding-bottom: 10px;">
+                                auth.users Table</h3>
+                            <p style="font-style: italic; text-align: center; margin-top: 0; font-size: 0.9em;">Supabase
+                                Auth System</p>
+                            <ul style="list-style-type: none; padding-left: 0;">
+                                <li><strong>id</strong>: UUID (PK)</li>
+                                <li><strong>email</strong>: String</li>
+                                <li><strong>...</strong> (other auth fields)</li>
+                            </ul>
+                        </div>
+
+                        <!-- Reservations Table -->
+                        <div
+                            style="border: 2px solid #333; border-radius: 8px; padding: 20px; background-color: #f9f; width: 300px;">
+                            <h3
+                                style="text-align: center; margin-top: 0; border-bottom: 1px solid #333; padding-bottom: 10px;">
+                                public.reservations Table</h3>
+                            <ul style="list-style-type: none; padding-left: 0;">
+                                <li><strong>id</strong>: UUID (PK) DEFAULT gen_random_uuid()</li>
+                                <li><strong>user_id</strong>: UUID (FK) REFERENCES auth.users(id) ON DELETE CASCADE</li>
+                                <li><strong>start_time</strong>: TIMESTAMP WITH TIME ZONE NOT NULL</li>
+                                <li><strong>end_time</strong>: TIMESTAMP WITH TIME ZONE NOT NULL</li>
+                                <li><strong>description</strong>: TEXT</li>
+                                <li><strong>created_at</strong>: TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL</li>
+                            </ul>
+                            <div style="margin-top: 15px; border-top: 1px dashed #333; padding-top: 10px;">
+                                <h4 style="margin-top: 0;">Indexes:</h4>
+                                <ul style="font-size: 0.9em;">
+                                    <li>reservations_time_range_idx (start_time, end_time)</li>
+                                    <li>reservations_user_id_idx (user_id)</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Relationship Arrow -->
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div style="width: 100px; text-align: center; font-weight: bold;">1:n</div>
+                        <div style="width: 200px; height: 2px; background-color: #333; position: relative;">
+                            <div
+                                style="position: absolute; right: -10px; top: -4px; width: 0; height: 0; border-top: 5px solid transparent; border-bottom: 5px solid transparent; border-left: 10px solid #333;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Constraints and Policies -->
+                    <div
+                        style="margin-top: 30px; border: 2px solid #333; border-radius: 8px; padding: 20px; background-color: #eef; width: 650px;">
+                        <h3
+                            style="text-align: center; margin-top: 0; border-bottom: 1px solid #333; padding-bottom: 10px;">
+                            Constraints, Triggers & Policies</h3>
+                        <div style="display: flex; gap: 30px;">
+                            <div style="flex: 1;">
+                                <h4 style="margin-bottom: 10px;">Constraints</h4>
+                                <ul>
+                                    <li><strong>start_before_end</strong>: start_time must be before end_time</li>
+                                </ul>
+
+                                <h4 style="margin-top: 20px; margin-bottom: 10px;">Triggers</h4>
+                                <ul>
+                                    <li><strong>check_reservation_overlap_trigger</strong>: Prevents overlapping
+                                        reservations</li>
+                                    <li>Executes before INSERT or UPDATE</li>
+                                    <li>Checks if new reservation time overlaps with existing ones</li>
+                                </ul>
+                            </div>
+                            <div style="flex: 1;">
+                                <h4 style="margin-bottom: 10px;">Security Policies</h4>
+                                <ul>
+                                    <li>All users can view reservations</li>
+                                    <li>Users can only create their own reservations</li>
+                                    <li>Users can only update their own reservations</li>
+                                    <li>Users can only delete their own reservations</li>
+                                    <li>Service role has full access</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>Parking Space Manager System - Architecture Diagram for Presentation Purposes</p>
+    </footer>
+
+    <script>
+        // Initialize Mermaid
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            securityLevel: 'loose',
+            fontFamily: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif'
+        });
+
+        // Tab functionality
+        function openTab(evt, tabName) {
+            console.log("Opening tab:", tabName);
+            var i, tabcontent, tablinks;
+
+            // Hide all tab contents
+            tabcontent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].className = tabcontent[i].className.replace(" active", "");
+            }
+
+            // Deactivate all tabs
+            tablinks = document.getElementsByClassName("tab");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+
+            // Show current tab content and activate tab
+            var tabElement = document.getElementById(tabName);
+            console.log("Tab element:", tabElement);
+            if (tabElement) {
+                tabElement.className += " active";
+                evt.currentTarget.className += " active";
+            } else {
+                console.error("Tab element not found:", tabName);
+            }
+        }
+
+        // Check if all tabs exist
+        document.addEventListener('DOMContentLoaded', function () {
+            console.log("Architecture tab:", document.getElementById('architecture'));
+            console.log("User flow tab:", document.getElementById('userflow'));
+            console.log("Database tab:", document.getElementById('db-schema'));
+        });
+    </script>
+</body>
+
+</html>
